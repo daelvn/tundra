@@ -1,7 +1,7 @@
-import P, S, R, C, V, Ct, B from require 'lpeg'
+import P, S, R, C, V, Ct, B from require "lpeg"
 
-w        = S' \t\r\n' ^ 0
-wstop    = P'\n'^0
+w        = S" \t\r\n" ^ 0
+wstop    = P"\n"^0
 digit    = R"09"
 number   = C digit^1
 letter   = R"az"+R"AZ"+P"_"
@@ -31,7 +31,7 @@ tundra_parser = P {
   call:          V"identifier" * w * (V"identifier" + V"expression")^1 * wstop / Node "call"
 
   assignment:    V"identifier" * w * P"=" * w * V"expression" / Node "assignment"
-  list:          w * P'[' * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P']' * w / Node "list"
+  list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" * w / Node "list"
 }
 
 matchString = (s) -> tundra_parser\match s
