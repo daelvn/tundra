@@ -1,8 +1,8 @@
 import inspect      from require "debugkit.inspect"
-import match_string from require "tundra.parser"
+import matchString from require "tundra.parser"
 
-print inspect match_string([[
+print inspect matchString([[
 
-  apple.
+  z apple.
 
 ]])
