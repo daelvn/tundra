@@ -45,7 +45,7 @@ container. .= [(height : number.), (width : number.)]
 
 -- accessing named containers
 container./height = 5
-print! container./height
+print! container./height -- this would not actually print 5, since `container.` makes a new container.
 
 -- function definition
 fib 0 = 0
