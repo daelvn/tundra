@@ -6,5 +6,6 @@ return print(inspect(matchString([[
   container. .= 20*
   container. .= *
   container. .= **
+  z. container.
 
 ]])))
