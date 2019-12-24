@@ -1,0 +1,17 @@
+bottles = 99
+
+plural (bottles : Number.) = if (eq bottles 1) "" "s"
+
+loop 1             = print! "1 bottle of beer on the wall\n1 bottle of beer\nTake one down, pass it around"
+loop 0             = print! "better go to the store to buy some more."
+loop (n : Number.) =
+  -- if doesnt work like this! might need blocks
+  -- or lambdas!
+  if (neq n 99) (-> print! (string/format "%d bottle%s of beer on the wall" (sub n 1) (plural (sub n 1))))
+  if (neq n 99) (-> print! "")
+  print! (string/format "%d bottle%s of beer on the wall" n (plural n))
+  print! (string/format "%d bottle%s of beer" n (plural n))
+  print! "Take one down, pass it around"
+  loop (sub n 1)
+
+main = loop bottles

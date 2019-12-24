@@ -1,0 +1,4 @@
+-- fib implementation
+fib 0 = 0
+fib 1 = 1
+fib (n : number.) = (add (fib (sub n 1)) (fib (sub n 2)))

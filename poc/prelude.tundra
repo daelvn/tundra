@@ -1,0 +1,11 @@
+-- ideas for a tundra prelude
+
+-- Boolean
+Boolean. = [True., False.]
+
+-- List
+List. .= **
+
+-- Maybe
+Just.  .= *
+Maybe. .= [Nothing., Just.]

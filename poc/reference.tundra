@@ -1,0 +1,62 @@
+-- comment?
+
+-- atom instantiation
+atom.
+
+-- native list
+[a., b.]
+
+-- assignment
+a = b.
+
+-- identifier
+-- should accept unicode and non-special characters such as !
+a
+
+-- function call
+a b. c. -- a(b., c.)
+
+-- grouping
+a (b. c.) -- a (b. (c.))
+
+-- atom with constructors
+atom. .= [a., b.]
+
+-- container
+container. .= atom.
+
+-- calling container
+container. a. -- container. takes atom., a. is constructor for atom.
+
+-- wildcard
+container. .= * -- contains only one atom, but any atom
+
+-- fixed amount wildcard
+container. .= 3* -- contains any three atoms
+
+-- variable amount wildcard
+container. .= ** -- contains any amount of any atoms
+
+-- meta-aliasing (concept)
+(name : atom.)
+
+-- named containers
+container. .= [(height : number.), (width : number.)]
+
+-- accessing named containers
+container./height = 5
+print! container./height
+
+-- function definition
+fib 0 = 0
+fib 1 = 1
+fib (n : number.) = (add (fib (sub n 1)) (fib (sub n 2)))
+
+-- core lib
+boolean. .= [true., false.]
+
+-- i would still push for statements implemented as functions
+if (eq b true.) (print! "hey") (print! "nope")
+
+-- flags (create new previously unspecified named attribute in a container)
+human. @dead -- is the same as human.\dead = true.
