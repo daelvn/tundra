@@ -35,7 +35,8 @@ tundra_parser = P {
   call:          V"named" * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
   assignment:    V"identifier" * w * P"=" * w * V"expression" / Node "assignment"
-  container:     V"atom" * w * P".=" * w * (V"list" + V"atom") / Node "container"
+  wildcard:      (number^0 * P"*") / Node "wildcard"
+  container:     V"atom" * w * P".=" * w * (V"wildcard" + V"list" + V"atom") / Node "container"
   list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" * w / Node "list"
 }
 
