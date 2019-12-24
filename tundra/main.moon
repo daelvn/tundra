@@ -3,6 +3,12 @@ import matchString from require "tundra.parser"
 
 print inspect matchString([[
 
-  apple.
+  atom.
+  [a., b.]
+  a = b.
+  a
+
+  a b. c.
+  a (b. c.)
 
 ]])
