@@ -3,6 +3,7 @@
 -- By daelvn
 import DEBUG        from  require "tundra.config"
 import inspect, log from (require "tundra.debug" ) DEBUG
+import tundraError  from  require "tundra.error"
 
 -- Utils
 fst = (t) -> t[1]
@@ -20,12 +21,14 @@ Tundra = ->
 local checkProgram
 
 -- resolves a reference
-resovleReference = (ref) =>
+resolveReference = (xref) =>
+  ref = @references[xref]
+  tundraError "Reference '#{xref}' could not be resolved" unless ref
   switch fst ref
-    when "ref" then return resovleReference @, @references[snd ref]
+    when "ref" then return resolveReference @, @references[snd ref]
     else
       if (trd ref) == "atom" then return @atoms[snd ref]
-  error "resolveReference $ reference #{inspect ref} could not be resolved"
+  tundraError "Reference '#{inspect ref}' could not be resolved"
 
 -- checks the types in any node
 checkNode = (node) =>
@@ -41,13 +44,13 @@ checkNode = (node) =>
     when "container"
       atom = checkNode @, fst node
       as   = checkNode @, snd node
-      error "checkNode $ expected Atom in container definition" if (fst atom) != "atom"
+      tundraError "Expected Atom in container definition" if (fst atom) != "atom"
       log "container/", "=> #{snd atom}. = #{inspect as}"
       @atoms[snd atom] = as
     when "assignment"
       ref  = checkNode @, fst node
       xref = checkNode @, snd node
-      error "checkNode @ expected ref in assignment LHS" if (fst ref) != "ref"
+      tundraError "Expected Ref in assignment LHS" if (fst ref) != "ref"
       log "assignment/", "=> #{snd ref} (#{trd ref}) = #{inspect xref} (#{trd ref})"
       switch trd xref
         when "atom"
@@ -56,7 +59,7 @@ checkNode = (node) =>
           @lookup[snd ref]     = @atoms[snd xref]
           @references[snd ref] = @atoms[snd xref]
         when "ref"
-          @lookup[snd ref]    = resovleReference @, @references[snd xref]
+          @lookup[snd ref]    = resolveReference @, snd xref
           @referenes[snd ref] = @references[snd xref]
 
 
@@ -65,7 +68,7 @@ checkProgram = (ast) ->
   @ = Tundra!
   --
   if ast.type != "body"
-    error "checkProgram $ AST given is not valid. 'body' tag missing."
+    tundraError "Generated AST is not valid. 'body' tag missing."
   --
   for node in *ast do checkNode @, node
   @

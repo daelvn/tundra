@@ -2,6 +2,7 @@
 -- Parser for Tundra
 -- By Pancakeddd
 import P, S, R, C, V, Ct, Cp, B, T from require "lpeg"
+import tundraError                 from require "tundra.error"
 unpack or= table.unpack
 
 defined_errors =
@@ -61,7 +62,7 @@ matchString = (s) ->
   --  line, col = re.calcline s, errpos
   --  error_message = defined_errors[e] .. " at (#{line}, #{col})"
   --  error "tundra: #{error_message}"
-  error "tundra $ could not parse" unless ast
+  tundraError "Could not parse program" unless ast
   ast
 
 { :matchString }
