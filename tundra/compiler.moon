@@ -58,9 +58,10 @@ node_compile_functions =
     called = fst node
     called_name = unpackName called
 
-    switch nam called
-      when "atom"
-        Call called_name, [@ v for v in *node[2,]]
+    Call called_name, [@ v for v in *node[2,]]
+
+  group: (node) =>
+    @ fst node
 
 
   atom: (node) =>

@@ -11,7 +11,7 @@ tee = (x) ->
 
 ast = (apply transformers) matchString [[
 
-  z = a. b
+  print (tostring 10)
 
 ]]
 
