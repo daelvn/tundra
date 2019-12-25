@@ -17,4 +17,4 @@ ast = (apply transformers) matchString [[
 ]]
 
 log "ast",      inspect ast
-log "compiled," compileNode ast
+log "compiled", compileNode ast
