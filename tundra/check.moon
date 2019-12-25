@@ -71,7 +71,9 @@ checkNode = (node) =>
         for elem in *as[4,]
           switch fst elem
             when "atom"
-              unless @atoms[snd elem] then @atoms[snd elem] = {"constructor", (snd elem), "atom", }
+              unless @atoms[snd elem] then @atoms[snd elem] = {"constructor", (snd elem), "atom", atom}
+            --when "ref"
+              --@lookup[snd elem]
     when "assignment"
       ref  = checkNode @, fst node
       xref = checkNode @, snd node
