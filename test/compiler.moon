@@ -3,7 +3,7 @@ import inspect, log        from (require "tundra.debug") DEBUG
 import matchString         from  require "tundra.parser"
 import apply, transformers from  require "tundra.transform"
 --import checkProgram        from  require "tundra.check"
-import compileNode         from  require "tundra.compiler"
+import compileNodeToFile   from  require "tundra.compiler"
 
 tee = (x) ->
   log "tee", inspect x
@@ -11,9 +11,10 @@ tee = (x) ->
 
 ast = (apply transformers) matchString [[
 
-  print (tostring 10)
+  bowl. .= **
+  grape_bowl = bowl. grape. grape. grape.
 
 ]]
 
 log "ast",      inspect ast
-log "compiled", compileNode ast
+log "compiled", compileNodeToFile ast, "poc/test.lua"

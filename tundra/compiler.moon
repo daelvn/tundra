@@ -75,4 +75,10 @@ compileNode = (node) ->
   return f compileNode, node if f
   error "Could not find compiling function for #{nam node}"
 
-{:compileNode}
+compileNodeToFile = (node, filename) ->
+  out = compileNode node
+  with io.open filename, "w"
+    \write out
+    \close!
+
+{:compileNode, :compileNodeToFile}
