@@ -4,6 +4,7 @@ import matchString from require "tundra.parser"
 
 print inspect matchString [[
 
-a = z.
+ctr. .= number.
+x = ctr. 10
 
 ]]
