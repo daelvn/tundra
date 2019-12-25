@@ -1,4 +1,13 @@
-import P, S, R, C, V, Ct, B from require "lpeg"
+import P, S, R, C, V, Ct, B, T from require "lpeglabel"
+
+throw = T
+
+re = require 'relabel'
+
+defined_errors =
+  dot_error:     "unexpected value after '.='"
+  expected_expr: "expected expression"
+  expected_dot:  "expected atom but got identifier"
 
 w        = S" \t\r\n" ^ 0
 space    = S" \t" ^ 0
@@ -24,7 +33,7 @@ tundra_parser = P {
 
   atom:          w * dot_word / Node "atom"
   identifier:    w * word     / Node "ref"
-  number:        w * number   / Node "number"
+  number:        w * number   / Node "atom"
 
   named:         V"atom" + V"identifier"
   real_atom:     V"named" + V"number"
@@ -34,14 +43,19 @@ tundra_parser = P {
   
   call:          V"named" * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
-  assignment:    V"identifier" * w * P"=" * w * V"expression" / Node "assignment"
+  assignment:    V"identifier" * w * P"=" * w * (V"expression" + throw"expected_expr") / Node "assignment"
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
   wildcard_all:  P"**" / Node "all_wildcard"
   wildcard:      P"*" / Node "wildcard"
-  container:     V"atom" * w * P".=" * w * (V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom") / Node "container"
+  container:     (V"atom" * w * P".=" + V"identifier" * w * P".=" * throw"expected_dot") * w * (V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom") / Node "container"
   list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" * w / Node "list"
 }
 
-matchString = (s) -> tundra_parser\match s
-
+matchString = (s) -> 
+  ast, e, errpos = tundra_parser\match s
+  unless ast
+    line, col = re.calcline s, errpos
+    error_message = defined_errors[e] .. " at (#{line}, #{col})"
+    error "tundra: #{error_message}"
+  ast
 { :matchString }
