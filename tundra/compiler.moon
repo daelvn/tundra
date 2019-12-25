@@ -3,19 +3,19 @@
 -- By Pancakeddd
 import fst, snd, trd, nam, quote from require "tundra.utils"
 
-create_args = (t) -> table.concat t, ", "
+createArgs = (t) -> table.concat t, ", "
 
-create_atom = (t) ->
+createAtom = (t) ->
   z = ["#{k} = #{v}" for k, v in pairs t]
-  "{#{create_args z}}"
+  "{#{createArgs z}}"
 
-create_function = (args, f, ret=false) ->
+createFunction = (args, f, ret=false) ->
   r = do
     if ret
       "return "
     else
       ""
-  "function(#{create_args args})\n#{r .. table.concat(f, "\n")}\nend"
+  "function(#{createArgs args})\n#{r .. table.concat(f, "\n")}\nend"
 
 set = (left, right, l=true) ->
   loc = do
@@ -25,13 +25,13 @@ set = (left, right, l=true) ->
       ""
   loc .. left .. " = " .. right
 
-unpack_name = (t) ->
+unpackName = (t) ->
   switch nam t
     when "ref", "atom"
       return fst t
 
-create_call = (name, args) ->
-  "#{name}(#{create_args args})"
+createCall = (name, args) ->
+  "#{name}(#{createArgs args})"
 
 node_compile_functions =
   body: (node) =>
@@ -39,33 +39,33 @@ node_compile_functions =
       @ n), "\n")
 
   assignment: (node, l=true) =>
-    left = unpack_name fst node
+    left = unpackName fst node
     right = @ snd node
     set left, right, l
 
   container: (node, l=true) =>
-    contain = unpack_name fst node
+    contain = unpackName fst node
     v_contained = snd node
     
     switch nam v_contained
       when "all_wildcard"
-        set contain, create_function({'...'}, {create_atom {type: quote(contain), '...'}}, true)
+        set contain, createFunction({'...'}, {createAtom {type: quote(contain), '...'}}, true)
       when "atom"
-        un = [unpack_name v for v in *node[2,]]
-        set contain, create_function(un, {create_atom {type: quote(contain), table.concat un}}, true)
+        un = [unpackName v for v in *node[2,]]
+        set contain, createFunction(un, {createAtom {type: quote(contain), table.concat un}}, true)
   
   call: (node) =>
     called = fst node
-    called_name = unpack_name called
+    called_name = unpackName called
 
     switch nam called
       when "atom"
-        create_call called_name, [@ v for v in *node[2,]]
+        createCall called_name, [@ v for v in *node[2,]]
 
 
   atom: (node) =>
     return fst node if tonumber fst node
-    create_atom {type: quote fst node}
+    createAtom {type: quote fst node}
       
 
 compileNode = (node) ->
