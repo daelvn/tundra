@@ -1,14 +1,10 @@
 -- tundra.check
 -- Type checking for Tundra
 -- By daelvn
-import DEBUG        from  require "tundra.config"
-import inspect, log from (require "tundra.debug" ) DEBUG
-import tundraError  from  require "tundra.error"
-
--- Utils
-fst = (t) -> t[1]
-snd = (t) -> t[2]
-trd = (t) -> t[3]
+import DEBUG         from  require "tundra.config"
+import inspect, log  from (require "tundra.debug" ) DEBUG
+import tundraError   from  require "tundra.error"
+import fst, snd, trd from  require "tundra.utils"
 
 -- Create a new instance of the language frame
 Tundra = ->
