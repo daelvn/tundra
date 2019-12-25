@@ -1,8 +1,8 @@
 import P, S, R, C, V, Ct, B, T from require "lpeglabel"
+re                                = require "relabel"
 
+-- Aliases
 throw = T
-
-re = require 'relabel'
 
 defined_errors =
   dot_error:     "unexpected value after '.='"
@@ -20,6 +20,7 @@ dot_word = word * P"."
 comment  = P"--" * (1 - S"\r\n")^0 * wstop
 
 stop     = (e) -> e - wstop
+
 -- Creates AST instance
 Node = (name) -> (...) -> {type: name, unpack {...}}
 
@@ -45,8 +46,8 @@ tundra_parser = P {
 
   assignment:    V"identifier" * w * P"=" * w * (V"expression" + throw"expected_expr") / Node "assignment"
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
-  wildcard_all:  P"**" / Node "all_wildcard"
-  wildcard:      P"*" / Node "wildcard"
+  wildcard_all:  P"**"             / Node "all_wildcard"
+  wildcard:      P"*"              / Node "wildcard"
   container:     (V"atom" * w * P".=" + V"identifier" * w * P".=" * throw"expected_dot") * w * (V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom") / Node "container"
   list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" * w / Node "list"
 }
@@ -58,4 +59,5 @@ matchString = (s) ->
     error_message = defined_errors[e] .. " at (#{line}, #{col})"
     error "tundra: #{error_message}"
   ast
+
 { :matchString }
