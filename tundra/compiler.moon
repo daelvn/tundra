@@ -3,19 +3,19 @@
 -- By Pancakeddd
 import fst, snd, trd, nam, quote from require "tundra.utils"
 
-createArgs = (t) -> table.concat t, ", "
+Args = (t) -> table.concat t, ", "
 
-createAtom = (t) ->
+Atom = (t) ->
   z = ["#{k} = #{v}" for k, v in pairs t]
-  "{#{createArgs z}}"
+  "{#{Args z}}"
 
-createFunction = (args, f, ret=false) ->
+Function = (args, f, ret=false) ->
   r = do
     if ret
       "return "
     else
       ""
-  "function(#{createArgs args})\n#{r .. table.concat(f, "\n")}\nend"
+  "function(#{Args args})\n#{r .. table.concat(f, "\n")}\nend"
 
 set = (left, right, l=true) ->
   loc = do
@@ -30,8 +30,8 @@ unpackName = (t) ->
     when "ref", "atom"
       return fst t
 
-createCall = (name, args) ->
-  "#{name}(#{createArgs args})"
+Call = (name, args) ->
+  "#{name}(#{Args args})"
 
 node_compile_functions =
   body: (node) =>
@@ -49,10 +49,10 @@ node_compile_functions =
     
     switch nam v_contained
       when "all_wildcard"
-        set contain, createFunction({'...'}, {createAtom {type: quote(contain), '...'}}, true)
+        set contain, Function({'...'}, {Atom {type: quote(contain), '...'}}, true)
       when "atom"
         un = [unpackName v for v in *node[2,]]
-        set contain, createFunction(un, {createAtom {type: quote(contain), table.concat un}}, true)
+        set contain, Function(un, {Atom {type: quote(contain), table.concat un}}, true)
   
   call: (node) =>
     called = fst node
@@ -60,12 +60,12 @@ node_compile_functions =
 
     switch nam called
       when "atom"
-        createCall called_name, [@ v for v in *node[2,]]
+        Call called_name, [@ v for v in *node[2,]]
 
 
   atom: (node) =>
     return fst node if tonumber fst node
-    createAtom {type: quote fst node}
+    Atom {type: quote fst node}
       
 
 compileNode = (node) ->

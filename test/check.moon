@@ -10,7 +10,7 @@ tee = (x) ->
 
 log "Frame", inspect checkProgram (apply transformers) matchString [[
 
-ctr. .= number.
-x     = ctr. 10
+Boolean. .= [True., False.]
+List.    .= **
 
 ]]

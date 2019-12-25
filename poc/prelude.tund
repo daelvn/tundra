@@ -1,7 +1,7 @@
 -- ideas for a tundra prelude
 
 -- Boolean
-Boolean. = [True., False.]
+Boolean. .= [True., False.]
 
 -- List
 List. .= **
