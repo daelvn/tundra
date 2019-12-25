@@ -12,7 +12,7 @@ tee = (x) ->
 ast = (apply transformers) matchString [[
 
   container. .= number.
-  x = container. 10
+  container. 10
 
 ]]
 
