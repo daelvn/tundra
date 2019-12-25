@@ -53,11 +53,12 @@ tundra_parser = P {
 }
 
 matchString = (s) -> 
-  ast, e, errpos = tundra_parser\match s
-  unless ast
-    line, col = re.calcline s, errpos
-    error_message = defined_errors[e] .. " at (#{line}, #{col})"
-    error "tundra: #{error_message}"
+  ast, _, _ = tundra_parser\match s
+  --unless ast
+  --  line, col = re.calcline s, errpos
+  --  error_message = defined_errors[e] .. " at (#{line}, #{col})"
+  --  error "tundra: #{error_message}"
+  error "tundra $ could not parse" unless ast
   ast
 
 { :matchString }
