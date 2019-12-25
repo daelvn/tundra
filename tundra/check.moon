@@ -40,6 +40,11 @@ checkNode = (node) =>
     when "atom", "wildcard", "wildcard_number", "all_wildcard"
       log "node/", "=> #{node.type} (#{fst node})"
       return {node.type, (fst node), "atom"}
+    when "call"
+      log "call/", "=> #{fst node} $ #{inspect node}"
+      r = {node.type, (fst node), "call"}
+      for v in *node[2,] do table.insert r, v
+      r
     when "container"
       atom = checkNode @, fst node
       as   = checkNode @, snd node
@@ -58,10 +63,13 @@ checkNode = (node) =>
           @lookup[snd ref]     = @atoms[snd xref]
           @references[snd ref] = {"atom", (snd xref), "atom"}
         when "ref"
-          log "assignment (lookup)", inspect xref
           @lookup[snd ref]     = resolveReference @, snd xref
           @references[snd ref] = {"ref", (snd xref), "ref"}
-
+        when "call"
+          log "assignment/ (call)", inspect xref
+          r = {"call", (fst snd xref), "call"}
+          for arg in *xref[4,] do table.insert r, arg
+          @references[snd ref] = r
 
 -- Check an AST
 checkProgram = (ast) ->

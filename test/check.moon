@@ -8,9 +8,9 @@ tee = (x) ->
   log "tee", inspect x
   x
 
-print inspect checkProgram (apply transformers) matchString [[
+log "Frame", inspect checkProgram (apply transformers) matchString [[
 
-  container. .= number.
-  container. 10
+ctr. .= number.
+x     = ctr. 10
 
 ]]
