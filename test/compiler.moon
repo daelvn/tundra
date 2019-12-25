@@ -11,8 +11,7 @@ tee = (x) ->
 
 ast = (apply transformers) matchString [[
 
-  container. .= number.
-  container. 10
+  z = a. b
 
 ]]
 
