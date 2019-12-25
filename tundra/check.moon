@@ -16,6 +16,17 @@ Tundra = ->
 
 local checkProgram
 
+-- turns a List node into a string
+listToString = (L) ->
+  s = "["
+  for v in *L
+    log "listToString", inspect v
+    switch v.type
+      when "atom" then s ..= "#{fst v}.,"
+      when "ref"  then s ..= "#{fst v},"
+  s = s\sub 1, -2
+  s .. "]"
+
 -- resolves a reference
 resolveReference = (xref) =>
   log "resolveReference (xref)", (xref or "?")
@@ -37,6 +48,11 @@ checkNode = (node) =>
     when "ref"
       log "ref/", "=> #{fst node}"
       return {node.type, (fst node), "ref"}
+    when "list"
+      log "list/", "=> #{inspect [v for v in *node]}"
+      r = {node.type, (listToString node), "list"}
+      for v in *node do table.insert r, checkNode @, v
+      r
     when "atom", "wildcard", "wildcard_number", "all_wildcard"
       log "node/", "=> #{node.type} (#{fst node})"
       return {node.type, (fst node), "atom"}
@@ -51,6 +67,11 @@ checkNode = (node) =>
       tundraError "Expected Atom in container definition" if (fst atom) != "atom"
       log "container/", "=> #{snd atom}. = #{inspect as}"
       @atoms[snd atom] = as
+      if (fst as) == "list"
+        for elem in *as[4,]
+          switch fst elem
+            when "atom"
+              unless @atoms[snd elem] then @atoms[snd elem] = {"constructor", (snd elem), "atom", }
     when "assignment"
       ref  = checkNode @, fst node
       xref = checkNode @, snd node
@@ -58,8 +79,7 @@ checkNode = (node) =>
       log "assignment/", "=> #{snd ref} (#{trd ref}) = #{inspect xref} (#{trd ref})"
       switch trd xref
         when "atom"
-          unless @atoms[snd xref]
-            @atoms[snd xref]   = {"insitu", (snd xref), "atom"}
+          unless @atoms[snd xref] then @atoms[snd xref] = {"insitu", (snd xref), "atom"}
           @lookup[snd ref]     = @atoms[snd xref]
           @references[snd ref] = {"atom", (snd xref), "atom"}
         when "ref"
