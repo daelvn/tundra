@@ -1,8 +1,9 @@
-import inspect     from require "debugkit.inspect"
+import DEBUG       from require "tundra.config"
+import inspect     from (require "tundra.debug") DEBUG
 import matchString from require "tundra.parser"
 
-print inspect matchString([[
+print inspect matchString [[
 
- z. .= **
+a = z.
 
-]])
+]]

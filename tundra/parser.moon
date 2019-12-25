@@ -1,3 +1,6 @@
+-- tundra.parser
+-- Parser for Tundra
+-- By Pancakeddd
 import P, S, R, C, V, Ct, Cp, B, T from require "lpeg"
 unpack or= table.unpack
 
