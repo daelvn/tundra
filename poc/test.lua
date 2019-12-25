@@ -1,1 +1,1 @@
-if(eq(b, {type = "true"}), print({type = "hey"}), print({type = "nope"}))
+if(eq(b, {type = "true"}), print({1 = "hey", type = "string"}), print({1 = "nope", type = "string"}))

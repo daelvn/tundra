@@ -66,6 +66,7 @@ node_compile_functions =
 
   atom: (node) =>
     return fst node if tonumber fst node
+    return Atom {type: quote("string"), ['1']: fst node} if snd node
     Atom {type: quote fst node}
     
   ref: (node) => fst node

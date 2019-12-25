@@ -28,7 +28,7 @@ stop     = (e) -> e - wstop
 
 -- Creates AST instance
 Node      = (name) -> (...) -> {type: name, unpack {...}}
-NodeWith = (name, args) -> (...) -> {type: name, unpack({...})}
+NodeWith = (name, args) -> (...) -> {type: name, unpack({...}), args}
 
 tundra_parser = P {
   "tundra"
@@ -40,7 +40,7 @@ tundra_parser = P {
 
   atom:          w * dot_word / Node "atom"
   number:        w * number   / Node "atom"
-  string:        w * string   / NodeWith "atom", {true} -- string = true
+  string:        w * string   / NodeWith "atom", true -- string = true
   identifier:    w * word     / Node "ref"
 
   named:         V"atom" + V"identifier"
