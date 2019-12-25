@@ -1,15 +1,16 @@
 -- tundra.error
 -- Error reporting for Tundra
 -- By daelvn
-import style from require "ansikit.style"
+import style             from require "ansikit.style"
+import rewrite_traceback from require "moonscript.errors"
 
 tundraTraceback = ->
-  text  = debug.traceback!
+  text  = rewrite_traceback debug.traceback!, ""
   lines = [line for line in text\gmatch "[^\n]+"]
   final = {}
   for i, line in ipairs lines
-    if i == 1
-      table.insert final, style.red "Stack traceback:"
+    if i <= 2
+      table.insert final, style.red "Stack traceback:" if i == 1
       continue
     if line\match"/bin/moon" or line\match"%[C%]"
       continue

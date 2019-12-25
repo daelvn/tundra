@@ -18,10 +18,13 @@ local checkProgram
 
 -- resolves a reference
 resolveReference = (xref) =>
+  log "resolveReference (xref)", (xref or "?")
   ref = @references[xref]
   tundraError "Reference '#{xref}' could not be resolved" unless ref
   switch fst ref
-    when "ref" then return resolveReference @, @references[snd ref]
+    when "ref"
+      log "resolveReference (->ref)", inspect ref
+      return resolveReference @, snd ref
     else
       if (trd ref) == "atom" then return @atoms[snd ref]
   tundraError "Reference '#{inspect ref}%{red}' could not be resolved"
@@ -53,10 +56,11 @@ checkNode = (node) =>
           unless @atoms[snd xref]
             @atoms[snd xref]   = {"insitu", (snd xref), "atom"}
           @lookup[snd ref]     = @atoms[snd xref]
-          @references[snd ref] = {"atom", @atoms[snd xref], "atom"}
+          @references[snd ref] = {"atom", (snd xref), "atom"}
         when "ref"
+          log "assignment (lookup)", inspect xref
           @lookup[snd ref]     = resolveReference @, snd xref
-          @references[snd ref] = {"ref", @references[snd xref], "ref"}
+          @references[snd ref] = {"ref", (snd xref), "ref"}
 
 
 -- Check an AST
