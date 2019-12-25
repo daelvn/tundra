@@ -3,13 +3,22 @@ import inspect, log        from (require "tundra.debug") DEBUG
 import matchString         from  require "tundra.parser"
 import apply, transformers from  require "tundra.transform"
 import checkProgram        from  require "tundra.check"
+import compileNode         from  require "tundra.compiler"
 
 tee = (x) ->
   log "tee", inspect x
   x
 
-log inspect checkProgram (apply transformers) matchString [[
+ast = (apply transformers) matchString [[
 
-a = b.
+  container. .= number.
+  x = container. 10
 
 ]]
+
+print inspect ast
+
+check = checkProgram ast
+print log inspect check
+
+print compileNode ast
