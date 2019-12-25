@@ -10,6 +10,8 @@ tee = (x) ->
 
 log inspect checkProgram (apply transformers) matchString [[
 
-a = b
+a = b.
+c = a
+d = c
 
 ]]

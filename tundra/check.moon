@@ -28,7 +28,7 @@ resolveReference = (xref) =>
     when "ref" then return resolveReference @, @references[snd ref]
     else
       if (trd ref) == "atom" then return @atoms[snd ref]
-  tundraError "Reference '#{inspect ref}' could not be resolved"
+  tundraError "Reference '#{inspect ref}%{red}' could not be resolved"
 
 -- checks the types in any node
 checkNode = (node) =>
@@ -55,12 +55,12 @@ checkNode = (node) =>
       switch trd xref
         when "atom"
           unless @atoms[snd xref]
-            @atoms[snd xref]   = {"insitu"}
+            @atoms[snd xref]   = {"insitu", (snd xref), "atom"}
           @lookup[snd ref]     = @atoms[snd xref]
-          @references[snd ref] = @atoms[snd xref]
+          @references[snd ref] = {"atom", @atoms[snd xref], "atom"}
         when "ref"
-          @lookup[snd ref]    = resolveReference @, snd xref
-          @referenes[snd ref] = @references[snd xref]
+          @lookup[snd ref]     = resolveReference @, snd xref
+          @references[snd ref] = {"ref", @references[snd xref], "ref"}
 
 
 -- Check an AST
