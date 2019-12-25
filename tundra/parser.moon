@@ -1,4 +1,4 @@
-import P, S, R, C, V, Ct, Cp, B, T from require "lpeglabel"
+import P, S, R, C, V, Ct, Cp, B, T from require "lpeg"
 
 defined_errors =
   dot_error:     "unexpected value after '.='"
