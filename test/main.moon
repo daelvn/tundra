@@ -4,6 +4,6 @@ import matchString from require "tundra.parser"
 
 print inspect matchString [[
 
-  "hey" "gey"
+a = z.
 
 ]]

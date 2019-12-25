@@ -1,4 +1,1 @@
-local bowl = function(...)
-return {1 = ..., type = "bowl"}
-end
-local grape_bowl = bowl({type = "grape"}, {type = "grape"}, {type = "grape"})
+if(eq(b, {type = "true"}), print({type = "hey"}), print({type = "nope"}))
