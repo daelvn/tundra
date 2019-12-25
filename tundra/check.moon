@@ -34,10 +34,10 @@ checkNode = (node) =>
     when "body" then checkProgram node
     when "ref"
       log "ref/", "=> #{fst node}"
-      return {node.type, fst node, "ref"}
+      return {node.type, (fst node), "ref"}
     when "atom", "wildcard", "wildcard_number", "all_wildcard"
       log "node/", "=> #{node.type} (#{fst node})"
-      return {node.type, fst node, "atom"}
+      return {node.type, (fst node), "atom"}
     when "container"
       atom = checkNode @, fst node
       as   = checkNode @, snd node
@@ -49,7 +49,7 @@ checkNode = (node) =>
       xref = checkNode @, snd node
       error "checkNode @ expected ref in assignment LHS" if (fst ref) != "ref"
       log "assignment/", "=> #{snd ref} (#{trd ref}) = #{inspect xref} (#{trd ref})"
-      switch trd xref -- @TODO RHS not detected
+      switch trd xref
         when "atom"
           unless @atoms[snd xref]
             @atoms[snd xref]   = {"insitu"}
