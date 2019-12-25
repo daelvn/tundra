@@ -3,6 +3,6 @@ import matchString from require "tundra.parser"
 
 print inspect matchString([[
 
- z .= **
+ z. .= **
 
 ]])

@@ -1,6 +1,4 @@
-import P, S, R, C, V, Ct, B, T from require "lpeglabel"
-
-throw = T
+import P, S, R, C, V, Ct, Cp, B, T from require "lpeglabel"
 
 re = require 'relabel'
 
@@ -8,6 +6,9 @@ defined_errors =
   dot_error:     "unexpected value after '.='"
   expected_expr: "expected expression"
   expected_dot:  "expected atom but got identifier"
+
+
+throw = (e) -> error "tundra: #{defined_errors[e]}"
 
 w        = S" \t\r\n" ^ 0
 space    = S" \t" ^ 0

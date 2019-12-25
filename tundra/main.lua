@@ -3,6 +3,6 @@ inspect = require("debugkit.inspect").inspect
 local matchString
 matchString = require("tundra.parser").matchString
 return print(inspect(matchString([[
- z .= **
+ z. .= **
 
 ]])))

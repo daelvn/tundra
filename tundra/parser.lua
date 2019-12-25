@@ -1,15 +1,18 @@
-local P, S, R, C, V, Ct, B, T
+local P, S, R, C, V, Ct, Cp, B, T
 do
   local _obj_0 = require("lpeglabel")
-  P, S, R, C, V, Ct, B, T = _obj_0.P, _obj_0.S, _obj_0.R, _obj_0.C, _obj_0.V, _obj_0.Ct, _obj_0.B, _obj_0.T
+  P, S, R, C, V, Ct, Cp, B, T = _obj_0.P, _obj_0.S, _obj_0.R, _obj_0.C, _obj_0.V, _obj_0.Ct, _obj_0.Cp, _obj_0.B, _obj_0.T
 end
-local throw = T
 local re = require('relabel')
 local defined_errors = {
   dot_error = "unexpected value after '.='",
   expected_expr = "expected expression",
   expected_dot = "expected atom but got identifier"
 }
+local throw
+throw = function(e)
+  return error("tundra: " .. tostring(defined_errors[e]))
+end
 local w = S(" \t\r\n") ^ 0
 local space = S(" \t") ^ 0
 local wstop = P("\n")
