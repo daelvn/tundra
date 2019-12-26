@@ -11,7 +11,7 @@ tee = (x) ->
 
 ast = (apply transformers) matchString [[
 
-  if (eq b true.) (print "hey") (print "nope")
+  human. .= **
 
 ]]
 

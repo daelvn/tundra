@@ -1,1 +1,3 @@
-if(eq(b, {type = "true"}), print({1 = "hey", type = "string"}), print({1 = "nope", type = "string"}))
+local human = function(...)
+return setmetatable({...}, {__type = "human"})
+end
