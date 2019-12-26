@@ -2,15 +2,16 @@ import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
 import matchString         from  require "tundra.parser"
 import apply, transformers from  require "tundra.transform"
-import checkProgram        from  require "tundra.check"
+import frameFor            from  require "tundra.check"
 
 tee = (x) ->
   log "tee", inspect x
   x
 
-log "Frame", inspect checkProgram (apply transformers) matchString [[
+log "Frame", inspect frameFor (apply transformers) matchString [[
 
-Boolean. .= [True., False.]
+Ex.
 List.    .= **
+x         = List. a. b. c.
 
 ]]

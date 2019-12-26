@@ -4,6 +4,7 @@ import matchString from require "tundra.parser"
 
 print inspect matchString [[
 
-  "hey" "gey"
+List. .= **
+x      = List. a. b. c.
 
 ]]
