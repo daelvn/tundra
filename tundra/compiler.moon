@@ -1,6 +1,8 @@
 -- tundra.compiler
 -- Compiles ast to code
 -- By Pancakeddd
+import DEBUG               from  require "tundra.config"
+import inspect, log        from (require "tundra.debug") DEBUG
 import fst, snd, trd, nam, last, quote from require "tundra.utils"
 
 Args = (t) -> table.concat t, ", "
@@ -91,6 +93,9 @@ node_compile_functions =
   function: (node) =>
     name = unpackName fst node
     set name, Function([unpackName v for v in *node[2,#node]], {@(last node)}, true)
+
+  lambda: (node) =>
+    Function([unpackName v for v in *node[1]], {@ node[2]}, true)
     
   ref: (node) => fst node
 

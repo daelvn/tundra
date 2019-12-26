@@ -5,13 +5,25 @@ import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
 import fst, snd, trd, nam, last, quote from require "tundra.utils"
 
-transformers = {
-  --removeAsteriskFromWildcard: =>
-  --  if @type == "wildcard" then @[1] = nil
-  --  return @
 
-  --do_transform: =>
-    --if @type == "do"
+transformers = {
+  removeAsteriskFromWildcard: =>
+    if @type == "wildcard" then @[1] = nil
+    return @
+
+  do_transform: =>
+    if @type == "do"
+      for i = 1, #@
+        node = @[i]
+        x = node[1]
+        y = node[2]
+        if nam(node) == "bind"
+          node.type = "call"
+          node[1] = {"bind", type: "ref"}
+          node[2] = y
+          node[3] = {{x, type: "args"}, @[i+1], type: "lambda"}
+      @ = @[1]
+    return @
 
 }
 
