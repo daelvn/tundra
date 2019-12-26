@@ -1,7 +1,7 @@
 -- tundra.compiler
 -- Compiles ast to code
 -- By Pancakeddd
-import fst, snd, trd, nam, quote from require "tundra.utils"
+import fst, snd, trd, nam, last, quote from require "tundra.utils"
 
 Args = (t) -> table.concat t, ", "
 
@@ -61,6 +61,14 @@ node_compile_functions =
     switch nam v_contained
       when "all_wildcard"
         set contain, Function({'...'}, {Atom quote(contain), {'...'}}, true)
+      when "list"
+        z = for i = 1, #v_contained
+          if name = unpackName v_contained[i]
+            "_#{name .. i}"
+          else
+            "_#{i}"
+
+        set contain, Function(z, {Atom quote(contain), z}, true)
       when "atom"
         un = [unpackName v for v in *node[2,]]
         set contain, Function(un, {Atom quote(contain), {table.concat un}}, true)
@@ -79,6 +87,10 @@ node_compile_functions =
     return fst node if tonumber fst node
     return fst node if snd node
     Atom quote(fst node), {}
+
+  function: (node) =>
+    name = unpackName fst node
+    set name, Function([unpackName v for v in *node[2,#node]], {@(last node)}, true)
     
   ref: (node) => fst node
 

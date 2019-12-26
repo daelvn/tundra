@@ -24,6 +24,16 @@ dot_word = word * P"."
 string   = C P'"' * ((1 - S'"\r\n\f\\') + (P'\\' * 1)) ^ 0 * '"'
 comment  = P"--" * (1 - S"\r\n")^0 * wstop
 
+keywords = {
+  'do', 'end'
+}
+
+checkKeywords = (n, kw) ->
+  x = n
+  for word in *kw
+    x = x - P word
+  x
+
 stop     = (e) -> e - wstop
 
 -- Creates AST instance
@@ -32,26 +42,29 @@ NodeWith = (name, args) -> (...) -> {type: name, unpack({...}), args}
 
 tundra_parser = P {
   "tundra"
-  tundra:        w * V"body"
+  tundra:        V"body"
 
-  body:          (V"statement" + V"expression")^0 / Node "body"
+  body:          w * (V"statement" + V"expression")^0 / Node "body"
+  do:            w * P"do" * w * (V"statement" + V"expression")^0 * w * P"end" / Node "do"
 
-  statement:     V"container" + V"assignment" + V"list"
+  statement:     V"container" + V"assignment" + V"list" + V"function" + V"bind"
 
   atom:          w * dot_word / Node "atom"
   number:        w * number   / Node "atom"
   string:        w * string   / NodeWith "atom", true -- string = true
-  identifier:    w * word     / Node "ref"
+  identifier:    w * (checkKeywords word, keywords)     / Node "ref"
 
   named:         V"atom" + V"identifier"
   real_atom:     V"named" + V"number" + V"string"
 
   group:         w * P"(" * w * V"expression" * w * P")" * w / Node "group"
-  expression:    V"call" + V"group" + V"real_atom"
+  expression:    V"call" + V"group" + V"real_atom" + V"do"
   
   call:          V"named" * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
-  assignment:    V"identifier" * w * P"=" * w * (V"expression") / Node "assignment"
+  assignment:    V"identifier" * w * P"=" * w * V"expression" / Node "assignment"
+  bind:          V"identifier" * w * P"<-" * w * V"expression" / Node "bind"
+  function:      (V"identifier" * w)^2 * P"=" * w * V"do" / Node "function"
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
   wildcard_all:  P"**"             / Node "all_wildcard"
   wildcard:      P"*"              / Node "wildcard"

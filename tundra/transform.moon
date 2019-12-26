@@ -3,11 +3,16 @@
 -- By Pancakeddd, daelvn
 import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
+import fst, snd, trd, nam, last, quote from require "tundra.utils"
 
 transformers = {
   --removeAsteriskFromWildcard: =>
   --  if @type == "wildcard" then @[1] = nil
   --  return @
+
+  --do_transform: =>
+    --if @type == "do"
+
 }
 
 apply = (fnl) -> (node) ->

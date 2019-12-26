@@ -10,9 +10,10 @@ tee = (x) ->
   x
 
 ast = (apply transformers) matchString [[
-
-  human. .= **
-
+  do
+    z <- y
+    sin z
+  end
 ]]
 
 log "ast",      inspect ast
