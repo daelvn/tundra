@@ -26,7 +26,7 @@ string   = C P'"' * ((1 - S'"\r\n\f\\') + (P'\\' * 1)) ^ 0 * '"'
 comment  = P"--" * (1 - S"\r\n")^0 * wstop
 
 keywords = {
-  'do', 'end'
+  "do", "end"
 }
 
 checkKeywords = (n, kw) ->
