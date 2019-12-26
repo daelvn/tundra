@@ -5,9 +5,20 @@ import fst, snd, trd, nam, quote from require "tundra.utils"
 
 Args = (t) -> table.concat t, ", "
 
-Atom = (t) ->
-  z = ["#{k} = #{v}" for k, v in pairs t]
-  "{#{Args z}}"
+FormatAtomKey = (k, v) ->
+  if tonumber k
+    v
+  else
+    "#{k} = #{v}"
+
+Atom = (typ, t) ->
+  z = [FormatAtomKey k, v for k, v in pairs t]
+  "setmetatable({#{Args z}}, {__type = #{typ}})"
+
+AtomPredicent = (typ, t, a) ->
+  z = [FormatAtomKey k, v for k, v in pairs t]
+  table.insert z, a
+  "setmetatable({#{Args z}}, {__type = #{typ}})"
 
 Function = (args, f, ret=false) ->
   r = do
@@ -49,10 +60,10 @@ node_compile_functions =
     
     switch nam v_contained
       when "all_wildcard"
-        set contain, Function({'...'}, {Atom {type: quote(contain), '...'}}, true)
+        set contain, Function({'...'}, {Atom quote(contain), {'...'}}, true)
       when "atom"
         un = [unpackName v for v in *node[2,]]
-        set contain, Function(un, {Atom {type: quote(contain), table.concat un}}, true)
+        set contain, Function(un, {Atom quote(contain), {table.concat un}}, true)
   
   call: (node) =>
     called = fst node
@@ -66,7 +77,8 @@ node_compile_functions =
 
   atom: (node) =>
     return fst node if tonumber fst node
-    Atom {type: quote fst node}
+    return fst node if snd node
+    Atom quote(fst node), {}
     
   ref: (node) => fst node
 

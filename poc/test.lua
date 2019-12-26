@@ -1,4 +1,3 @@
-local bowl = function(...)
-return {1 = ..., type = "bowl"}
+local human = function(...)
+return setmetatable({...}, {__type = "human"})
 end
-local grape_bowl = bowl({type = "grape"}, {type = "grape"}, {type = "grape"})

@@ -11,8 +11,7 @@ tee = (x) ->
 
 ast = (apply transformers) matchString [[
 
-  bowl. .= **
-  grape_bowl = bowl. grape. grape. grape.
+  human. .= **
 
 ]]
 

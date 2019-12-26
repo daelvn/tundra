@@ -21,12 +21,14 @@ number   = C digit^1
 letter   = R"az"+R"AZ"+P"_"
 word     = C letter^1
 dot_word = word * P"."
+string   = C P'"' * ((1 - S'"\r\n\f\\') + (P'\\' * 1)) ^ 0 * '"'
 comment  = P"--" * (1 - S"\r\n")^0 * wstop
 
 stop     = (e) -> e - wstop
 
 -- Creates AST instance
-Node = (name) -> (...) -> {type: name, unpack {...}}
+Node      = (name) -> (...) -> {type: name, unpack {...}}
+NodeWith = (name, args) -> (...) -> {type: name, unpack({...}), args}
 
 tundra_parser = P {
   "tundra"
@@ -37,11 +39,12 @@ tundra_parser = P {
   statement:     V"container" + V"assignment" + V"list"
 
   atom:          w * dot_word / Node "atom"
-  identifier:    w * word     / Node "ref"
   number:        w * number   / Node "atom"
+  string:        w * string   / NodeWith "atom", true -- string = true
+  identifier:    w * word     / Node "ref"
 
   named:         V"atom" + V"identifier"
-  real_atom:     V"named" + V"number"
+  real_atom:     V"named" + V"number" + V"string"
 
   group:         w * P"(" * w * V"expression" * w * P")" * w / Node "group"
   expression:    V"call" + V"group" + V"real_atom"
