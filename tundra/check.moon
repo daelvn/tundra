@@ -40,9 +40,9 @@ resolveReference = (xref) =>
       if (trd ref) == "atom" then return @atoms[snd ref]
   tundraError "Reference '#{inspect ref}%{red}' could not be resolved"
 
--- checks the types in any node
-checkNode = (node) =>
-  log "checkNode", inspect node
+-- compiles the frame for a node
+frameForNode = (node) =>
+  log "frameForNode", inspect node
   switch node.type
     when "body" then checkProgram node
     when "ref"
@@ -51,19 +51,25 @@ checkNode = (node) =>
     when "list"
       log "list/", "=> #{inspect [v for v in *node]}"
       r = {node.type, (listToString node), "list"}
-      for v in *node do table.insert r, checkNode @, v
+      for v in *node do table.insert r, frameForNode @, v
       r
-    when "atom", "wildcard", "wildcard_number", "all_wildcard"
+    when "atom", "wildcard", "wildcard_number", "wildcard_all"
       log "node/", "=> #{node.type} (#{fst node})"
+      @atoms[fst node] = {node.type, (fst node), "atom"} if "atom" == node.type
       return {node.type, (fst node), "atom"}
     when "call"
       log "call/", "=> #{fst node} $ #{inspect node}"
       r = {node.type, (fst node), "call"}
       for v in *node[2,] do table.insert r, v
-      r
+      log "call/ (callee)", inspect fst node 
+      switch (fst node).type
+        when "atom" then r[1] = "call_atom"
+        when "ref"  then r[1] = "call_ref"
+        when "call" then r[1] = "call_call"
+      return r
     when "container"
-      atom = checkNode @, fst node
-      as   = checkNode @, snd node
+      atom = frameForNode @, fst node
+      as   = frameForNode @, snd node
       tundraError "Expected Atom in container definition" if (fst atom) != "atom"
       log "container/", "=> #{snd atom}. = #{inspect as}"
       @atoms[snd atom] = as
@@ -74,9 +80,10 @@ checkNode = (node) =>
               unless @atoms[snd elem] then @atoms[snd elem] = {"constructor", (snd elem), "atom", atom}
             --when "ref"
               --@lookup[snd elem]
+      return true
     when "assignment"
-      ref  = checkNode @, fst node
-      xref = checkNode @, snd node
+      ref  = frameForNode @, fst node
+      xref = frameForNode @, snd node
       tundraError "Expected Ref in assignment LHS" if (fst ref) != "ref"
       log "assignment/", "=> #{snd ref} (#{trd ref}) = #{inspect xref} (#{trd ref})"
       switch trd xref
@@ -89,21 +96,50 @@ checkNode = (node) =>
           @references[snd ref] = {"ref", (snd xref), "ref"}
         when "call"
           log "assignment/ (call)", inspect xref
-          r = {"call", (fst snd xref), "call"}
+          r = {(fst xref), (fst snd xref), "call"}
           for arg in *xref[4,] do table.insert r, arg
           @references[snd ref] = r
+      return true
 
--- Check an AST
-checkProgram = (ast) ->
+-- returns the frame for an AST
+frameFor = (ast) ->
   @ = Tundra!
   --
   if ast.type != "body"
     tundraError "Generated AST is not valid. 'body' tag missing."
   --
-  for node in *ast do checkNode @, node
+  for node in *ast do frameForNode @, node
   @
 
+-- Checks the types of a program
+checkProgram = (ast) ->
+  @ = frameFor ast
+  --
+  for name, ref in pairs @references
+    switch trd ref
+      when "atom"
+        tundraError "Atom '#{snd ref}' referenced in '#{name}' does not exist." unless @atoms[snd ref]
+      when "ref"
+        tundraError "Reference '#{snd ref}' referenced in '#{name}' does not resolve." unless @lookup[snd ref]
+      when "call_atom"
+        atom = @atoms[snd ref]
+        tundraError "Atom '#{snd ref}' called in '#{name}' does not exist" unless atom
+        args = for arg in *ref[4,] do arg
+        switch fst atom
+          when "wildcard"
+            tundraError "Atom '#{snd ref}' called with more than one reference" if #args > 1
+          when "wildcard_number"
+            n = snd atom
+            tundraError "Atom '#{snd ref}' called with more than #{n} reference(s)" if #args > n
+          when "wildcard_all"
+            log "this is fine"
+          when "atom", "insitu", "constructor"
+            tundraError "Atom '#{snd ref}' cannot be called"
+      when "call_ref"
+        tundraError "Functions not yet implemented!"
+      when "call_call"
+        tundraError "Functions not yet implemented!"
 {
   :Tundra
-  :checkNode, :checkProgram
+  :frameForNode, :frameFor
 }

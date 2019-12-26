@@ -4,7 +4,7 @@ import matchString from require "tundra.parser"
 
 print inspect matchString [[
 
-Boolean. .= [True., False.]
-List.    .= **
+List. .= **
+x      = List. a. b. c.
 
 ]]

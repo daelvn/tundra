@@ -50,7 +50,7 @@ tundra_parser = P {
 
   assignment:    V"identifier" * w * P"=" * w * (V"expression") / Node "assignment"
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
-  wildcard_all:  P"**"             / Node "all_wildcard"
+  wildcard_all:  P"**"             / Node "wildcard_all"
   wildcard:      P"*"              / Node "wildcard"
   container:     V"atom" * w * P".=" * w * (V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom") / Node "container"
   list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" * w / Node "list"
