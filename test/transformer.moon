@@ -6,9 +6,9 @@ import compileNodeToFile   from  require "tundra.compiler"
 
 ast = matchString [[ 
 
-  generate_lpeg x = do
-    lpeg <- require "lpeg"
-    lpeg.P x
+  test x = do
+    y <- math.sin x
+    print y
   end
 
 ]]

@@ -1,5 +1,5 @@
-local generate_lpeg = function(x)
-return bind(require("lpeg"), function(lpeg)
-return lpeg.P(z)
+local test = function(x)
+return bind(math.sin(x), function(y)
+return print(y)
 end)
 end
