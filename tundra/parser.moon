@@ -1,7 +1,7 @@
 -- tundra.parser
 -- Parser for Tundra
 -- By Pancakeddd
-import P, S, R, C, V, Ct, Cp, B, T from require "lpeg"
+import P, S, R, C, V, Ct, Cmt, Cp, B, T from require "lpeg"
 import tundraError                 from require "tundra.error"
 unpack or= table.unpack
 
@@ -41,6 +41,20 @@ stop     = (e) -> e - wstop
 Node      = (name) -> (...) -> {type: name, unpack {...}}
 NodeWith = (name, args) -> (...) -> {type: name, unpack({...}), args}
 
+throw = (err) ->
+  Cmt "", ->
+    error defined_errors[err]
+
+throw_s = (s) ->
+  Cmt "", ->
+    error s
+
+need = (s, p) ->
+  throw(s) - p
+
+check_simple = (s) ->
+  P(s) + throw_s "expected '#{s}'"
+
 tundra_parser = P {
   "tundra"
   tundra:        V"body"
@@ -48,7 +62,7 @@ tundra_parser = P {
   body:          w * (V"statement" + V"expression")^0 / Node "body"
   do:            w * P"do" * w * (V"statement" + V"expression")^0 * w * P"end" / Node "do"
 
-  statement:     V"container" + V"assignment" + V"list" + V"function" + (V"bind" * (V"statement" + V"expression"))
+  statement:     V"container" + V"function_simple" + V"assignment" + V"list" + V"function" + (V"bind" * (V"statement" + V"expression"))
 
   atom:          w * dot_word / Node "atom"
   number:        w * number   / Node "atom"
@@ -65,13 +79,16 @@ tundra_parser = P {
   
   call:          V"named" * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
-  assignment:    V"identifier" * w * P"=" * w * V"expression" / Node "assignment"
-  bind:          V"identifier" * w * P"<-" * w * V"expression" / Node "bind"
-  function:      (V"identifier" * w)^2 * P"=" * w * (V"statement"+V"expression") / Node "function"
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
   wildcard_all:  P"**"             / Node "wildcard_all"
   wildcard:      P"*"              / Node "wildcard"
-  container:     V"atom" * w * P".=" * w * (V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom") / Node "container"
+
+  container:     (V"atom" * w * P".=" + V"identifier" * w * P".=" * throw"expected_dot") * w * need("dot_error", V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom") / Node "container"
+
+  assignment:    V"named" * w * P"=" * w * V"expression" / Node "assignment"
+  bind:          V"identifier" * w * P"<-" * w * V"expression" / Node "bind"
+  function:      (V"named" * w)^2 * P"=" * w * (V"statement"+V"expression") / Node "function"
+  function_simple: V"named" * w * P"=" * w * V"do" / Node "function"
   list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" * w / Node "list"
 }
 

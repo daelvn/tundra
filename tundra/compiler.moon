@@ -59,9 +59,8 @@ node_compile_functions =
   container: (node, l=true) =>
     contain = unpackName fst node
     v_contained = snd node
-    
     switch nam v_contained
-      when "all_wildcard"
+      when "wildcard_all"
         set contain, Function({'...'}, {Atom quote(contain), {'...'}}, true)
       when "list"
         z = for i = 1, #v_contained
@@ -110,4 +109,18 @@ compileNodeToFile = (node, filename) ->
     \write out
     \close!
 
-{:compileNode, :compileNodeToFile}
+import matchString         from  require "tundra.parser"
+import apply, transformers from  require "tundra.transform"
+
+compile = (filename) ->
+  filename_2 = filename\gsub "%.tund", "%.lua"
+  f = io.open filename, "r"
+  s = f\read "*all"
+  f\close!
+    
+  ast = matchString s
+  tast = (apply transformers) ast
+  compileNodeToFile tast, filename_2
+  print "Built '#{filename}' -> '#{filename_2}'"
+
+{:compileNode, :compileNodeToFile, :compile}

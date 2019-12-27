@@ -1,20 +1,15 @@
+argparse = require "argparse"
+
 import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
 import matchString         from  require "tundra.parser"
 import apply, transformers from  require "tundra.transform"
 --import checkProgram        from  require "tundra.check"
-import compileNodeToFile   from  require "tundra.compiler"
+import compile             from  require "tundra.compiler"
 
-tee = (x) ->
-  log "tee", inspect x
-  x
+argparser = with argparse 'Tundra', 'Tundra Compiler'
+  \argument "input", 'Tundra files'
 
-ast = (apply transformers) matchString [[
-  z = do
-    c
-    x
-  end
-]]
+args = argparser\parse!
 
-log "ast",      inspect ast
-log "compiled", compileNodeToFile ast, "poc/test.lua"
+compile args.input
