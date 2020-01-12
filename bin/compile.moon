@@ -9,7 +9,8 @@ import compile             from  require "tundra.compiler"
 
 argparser = with argparse 'Tundra', 'Tundra Compiler'
   \argument "input", 'Tundra files'
+  \flag "-a --ast"
 
-args = argparser\parse!
+args = argparser\parse! 
 
-compile args.input
+compile args.input, args.ast

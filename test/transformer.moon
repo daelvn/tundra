@@ -6,12 +6,7 @@ import compileNodeToFile   from  require "tundra.compiler"
 
 ast = matchString [[ 
 
-  test x = do
-    y <- math.sin x
-    z <- math.cos x
-    print y
-    print z
-  end
+  io/write "Hello"
 
 ]]
 

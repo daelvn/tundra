@@ -10,10 +10,7 @@ tee = (x) ->
   x
 
 ast = (apply transformers) matchString [[
-  z = do
-    c
-    x
-  end
+  bind "z"
 ]]
 
 log "ast",      inspect ast

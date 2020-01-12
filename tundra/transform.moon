@@ -3,8 +3,13 @@
 -- By Pancakeddd, daelvn
 import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
+import FileGenerator       from require 'tundra.core'
 import fst, snd, trd, nam, last, quote, buildNode, deep_copy from require "tundra.utils"
 
+protected_names = {
+  if: true
+  then: true
+}
 
 transformers = {
   removeAsteriskFromWildcard: =>
@@ -25,12 +30,32 @@ transformers = {
         else if @[i+1]
           then_f = deep_copy node
           node.type = "call"
-          node[1] = buildNode "ref", {"then"}
+          node[1] = buildNode "ref", {"next"}
           node[2] = then_f
           node[3] = @[i+1]
       @ = unpack @
     return @
 
+  index: =>
+    if @type == "ref"
+      @[1] = @[1]\gsub "%/", "."
+    return @
+
+  call_format: =>
+    if @type == "call"
+      if @[2] == ":"
+        @type = "call_nc"
+        c = @[3]
+        table.remove @, 2
+        @[2] = c
+    @
+
+
+  keyword_change: =>
+    if @type == "ref"
+      if protected_names[fst(@)]
+        @[1] = "_" .. @[1]
+    return @
 }
 
 apply = (fnl) -> (node) ->

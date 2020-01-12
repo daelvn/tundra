@@ -15,7 +15,7 @@ throw = (e) -> error "tundra: #{defined_errors[e]}"
 
 w        = S" \t\r\n" ^ 0
 space    = S" \t" ^ 1
-wstop    = P"\n"
+wstop    = P"\n" * w
 digit    = R"09"
 number   = C digit^1
 letter   = R"az"+R"AZ"+P"_"
@@ -35,8 +35,6 @@ checkKeywords = (n, kw) ->
     x = x - P word
   x
 
-stop     = (e) -> e - wstop
-
 -- Creates AST instance
 Node      = (name) -> (...) -> {type: name, unpack {...}}
 NodeWith = (name, args) -> (...) -> {type: name, unpack({...}), args}
@@ -50,7 +48,10 @@ throw_s = (s) ->
     error s
 
 need = (s, p) ->
-  throw(s) - p
+  (throw(s) - p) + p
+
+no_stop = (p) ->
+  (p - wstop)
 
 check_simple = (s) ->
   P(s) + throw_s "expected '#{s}'"
@@ -61,8 +62,12 @@ tundra_parser = P {
 
   body:          w * (V"statement" + V"expression")^0 / Node "body"
   do:            w * P"do" * w * (V"statement" + V"expression")^0 * w * P"end" / Node "do"
+  lambda:        (w * P[[\]] * V"named" * w * P"->" * w * (V"statement" + V"expression") / Node "lambda") +
+                 (P"->" * w * (V"statement" + V"expression") / Node "lambda_simple")
 
-  statement:     V"container" + V"function_simple" + V"assignment" + V"list" + V"function" + (V"bind" * (V"statement" + V"expression"))
+  --patria:        w * P"patria" * w * no_stop(V"named")^1 / Node "patria"
+
+  statement:     V"container" + V"function" + V"function_simple" + V"assignment" + V"list" + (V"bind" * (V"statement" + V"expression"))
 
   atom:          w * dot_word / Node "atom"
   number:        w * number   / Node "atom"
@@ -71,25 +76,25 @@ tundra_parser = P {
 
   named:         V"index_atom" + V"index" + V"atom" + V"identifier"
   real_atom:     V"index_atom" + V"index" + V"named" + V"number" + V"string"
-  index:         w * C(word_nc * (P"." * word_nc)^1) / Node "ref"
-  index_atom:    w * C(word_nc * (P"." * word_nc)^1) * P"." / Node "atom"
+  index:         w * C(word_nc * (P"/" * word_nc)^1) / Node "ref"
+  index_atom:    w * C(word_nc * (P"/" * word_nc)^1) * P"/" / Node "atom"
 
-  group:         w * P"(" * w * V"expression" * w * P")" * w / Node "group"
-  expression:    V"call" + V"group" + V"real_atom" + V"do"
+  group:         w * P"(" * w * V"expression" * w * P")" / Node "group"
+  expression:    V"call" + V"group" + V"real_atom" + V"do" + V"lambda"
   
-  call:          V"named" * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
+  call:          w * V"named" * ((C(P":"))^-1) * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
   wildcard_all:  P"**"             / Node "wildcard_all"
   wildcard:      P"*"              / Node "wildcard"
 
-  container:     (V"atom" * w * P".=" + V"identifier" * w * P".=" * throw"expected_dot") * w * need("dot_error", V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom") / Node "container"
+  container:     (V"atom" * w * P".=" + V"identifier" * w * P".=" * throw"expected_dot") * w * need("dot_error", (V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom")) / Node "container"
 
-  assignment:    V"named" * w * P"=" * w * V"expression" / Node "assignment"
-  bind:          V"identifier" * w * P"<-" * w * V"expression" / Node "bind"
-  function:      (V"named" * w)^2 * P"=" * w * (V"statement"+V"expression") / Node "function"
-  function_simple: V"named" * w * P"=" * w * V"do" / Node "function"
-  list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" * w / Node "list"
+  assignment:    w * V"named" * w * P"=" * w * V"expression" / Node "assignment"
+  bind:          w * V"identifier" * w * P"<-" * w * V"expression" / Node "bind"
+  function:      w * (V"named" - wstop)^2 * w * P"=" * w * (V"statement"+V"expression") / Node "function"
+  function_simple:  V"named" * w * P"=" * w * V"do" / Node "function"
+  list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" / Node "list"
 }
 
 matchString = (s) -> 
