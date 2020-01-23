@@ -6,9 +6,12 @@ import inspect, log        from (require "tundra.debug") DEBUG
 import FileGenerator       from require 'tundra.core'
 import fst, snd, trd, nam, last, quote, buildNode, deep_copy from require "tundra.utils"
 
+utf8 = require 'lua-utf8'
+
 protected_names = {
   if: true
   then: true
+  while: true
 }
 
 transformers = {
@@ -48,13 +51,36 @@ transformers = {
         c = @[3]
         table.remove @, 2
         @[2] = c
-    @
+    return @
 
+  type_define_remove: =>
+    if @type == "body"
+      c = for i = 1, #@
+        if nam(@[i]) == "atom"
+          i
+      i = 0
+      for idx in *c
+        table.remove(c, idx-i)
+        i += 1
+          
+    return @
 
   keyword_change: =>
     if @type == "ref"
       if protected_names[fst(@)]
         @[1] = "_" .. @[1]
+    return @
+
+  anything_ref: =>
+    if @type == "anything_ref"
+      code = fst @
+      @type = "ref"
+      @[1] = table.concat for i = 1, #code
+        c = utf8.sub code, i, i
+        if utf8.byte(c) != nil and c\match "[a-zA-Z0-9_]"
+          c
+        elseif utf8.byte(c) !=  nil
+          "_" .. utf8.byte c 
     return @
 }
 

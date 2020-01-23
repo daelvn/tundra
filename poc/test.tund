@@ -1,3 +1,2 @@
-square x = (mul x x)
-
-print (square x)
+x. .= string.
+y. .= [string., string.]

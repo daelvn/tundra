@@ -61,6 +61,10 @@ _then = function(e)
   end
 end
 
+call = function(f)
+  return f()
+end
+
 -- Lists
 
 list = function (...)

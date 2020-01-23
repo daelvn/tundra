@@ -1,5 +1,7 @@
 require "core"
-local square = function(x)
-return mul(x)(x)
+local x = function(string)
+return setmetatable({string}, {__type = "x"})
 end
-print(square(x))
+local y = function(_string1, _string2)
+return setmetatable({_string1, _string2}, {__type = "y"})
+end

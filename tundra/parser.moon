@@ -24,6 +24,7 @@ word_nc  = letter^1
 dot_word = word * P"."
 string   = C P'"' * ((1 - S'"\r\n\f\\') + (P'\\' * 1)) ^ 0 * '"'
 comment  = P"--" * (1 - S"\r\n")^0 * wstop
+anything = C ((P(1) - S" \t\r\n") - P":")^1
 
 keywords = {
   "do", "end"
@@ -65,8 +66,6 @@ tundra_parser = P {
   lambda:        (w * P[[\]] * V"named" * w * P"->" * w * (V"statement" + V"expression") / Node "lambda") +
                  (P"->" * w * (V"statement" + V"expression") / Node "lambda_simple")
 
-  --patria:        w * P"patria" * w * no_stop(V"named")^1 / Node "patria"
-
   statement:     V"container" + V"function" + V"function_simple" + V"assignment" + V"list" + (V"bind" * (V"statement" + V"expression"))
 
   atom:          w * dot_word / Node "atom"
@@ -78,11 +77,14 @@ tundra_parser = P {
   real_atom:     V"index_atom" + V"index" + V"named" + V"number" + V"string"
   index:         w * C(word_nc * (P"/" * word_nc)^1) / Node "ref"
   index_atom:    w * C(word_nc * (P"/" * word_nc)^1) * P"/" / Node "atom"
+  anything:      w * anything / Node "anything_ref"
 
-  group:         w * P"(" * w * V"expression" * w * P")" / Node "group"
+  group:         w * P"(" * w * V"expression_wo" * w * P")" / Node "group"
   expression:    V"call" + V"group" + V"real_atom" + V"do" + V"lambda"
+  expression_wo: V"call_no_check" + V"group" + V"real_atom" + V"do" + V"lambda"
   
-  call:          w * V"named" * ((C(P":"))^-1) * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
+  call_no_check: w * V"anything" * ((C(P":"))^-1) * space * (V"named" + V"expression")^1 / Node "call"
+  call: w * V"named" * ((C(P":"))^-1) * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
   wildcard_all:  P"**"             / Node "wildcard_all"
@@ -92,7 +94,7 @@ tundra_parser = P {
 
   assignment:    w * V"named" * w * P"=" * w * V"expression" / Node "assignment"
   bind:          w * V"identifier" * w * P"<-" * w * V"expression" / Node "bind"
-  function:      w * (V"named" - wstop)^2 * w * P"=" * w * (V"statement"+V"expression") / Node "function"
+  function:      w * V"anything" * space * (V"named" - wstop)^1 * w * P"=" * w * (V"statement"+V"expression") / Node "function"
   function_simple:  V"named" * w * P"=" * w * V"do" / Node "function"
   list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" / Node "list"
 }

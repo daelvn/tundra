@@ -4,6 +4,7 @@
 import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
 import fst, snd, trd, nam, last, quote from require "tundra.utils"
+import frameFor            from  require "tundra.check"
 
 lfs = require "lfs"
 
