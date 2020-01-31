@@ -37,25 +37,14 @@ checkKeywords = (n, kw) ->
   x
 
 -- Creates AST instance
-Node      = (name) -> (...) -> {type: name, unpack {...}}
+Node     = (name)       -> (...) -> {type: name, unpack {...}}
 NodeWith = (name, args) -> (...) -> {type: name, unpack({...}), args}
 
-throw = (err) ->
-  Cmt "", ->
-    error defined_errors[err]
-
-throw_s = (s) ->
-  Cmt "", ->
-    error s
-
-need = (s, p) ->
-  (throw(s) - p) + p
-
-no_stop = (p) ->
-  (p - wstop)
-
-check_simple = (s) ->
-  P(s) + throw_s "expected '#{s}'"
+throw        = (err)  -> Cmt "", -> error defined_errors[err]
+throw_s      = (s)    -> Cmt "", -> error s
+need         = (s, p) -> (throw(s) - p) + p
+no_stop      = (p)    -> (p - wstop)
+check_simple = (s)    -> P(s) + throw_s "expected '#{s}'"
 
 tundra_parser = P {
   "tundra"
@@ -84,7 +73,7 @@ tundra_parser = P {
   expression_wo: V"call_no_check" + V"group" + V"real_atom" + V"do" + V"lambda"
   
   call_no_check: w * V"anything" * ((C(P":"))^-1) * space * (V"named" + V"expression")^1 / Node "call"
-  call: w * V"named" * ((C(P":"))^-1) * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
+  call:          w * V"named" * ((C(P":"))^-1) * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
   wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
   wildcard_all:  P"**"             / Node "wildcard_all"

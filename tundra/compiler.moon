@@ -3,7 +3,8 @@
 -- By Pancakeddd
 import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
-import fst, snd, trd, nam, last, quote from require "tundra.utils"
+import fst, snd, trd, nam
+       last, quote         from require "tundra.utils"
 import frameFor            from  require "tundra.check"
 
 lfs = require "lfs"
@@ -42,7 +43,6 @@ Curry = (args, f) ->
       c = "function(#{args[i]})\nreturn #{c}\nend"
   c
 
-
 set = (left, right, l=true) ->
   loc = do
     if l
@@ -59,8 +59,7 @@ unpackName = (t) ->
     when "ref", "atom"
       return fst t
 
-Call = (name, args) ->
-  "#{name}(#{Args args})"
+Call = (name, args) -> "#{name}(#{Args args})"
 
 CurryCall = (name, args) ->
   call_args = ["(#{v})" for v in *args]
@@ -106,10 +105,8 @@ node_compile_functions =
 
     Call called_name, [@ v for v in *node[2,]]
 
-  group: (node) =>
-    @ fst node
-
-
+  group: (node) => @ fst node
+  
   atom: (node) =>
     return fst node if tonumber fst node
     return fst node if snd node

@@ -3,10 +3,14 @@
 -- By Pancakeddd, daelvn
 import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
-import FileGenerator       from require 'tundra.core'
-import fst, snd, trd, nam, last, quote, buildNode, deep_copy from require "tundra.utils"
+import FileGenerator       from  require "tundra.core"
+import fst, snd, trd, nam
+       last, quote
+       buildNode,
+       deep_copy           from  require "tundra.utils"
+utf8                          =  require "lua-utf8"
 
-utf8 = require 'lua-utf8'
+
 
 protected_names = {
   if: true
@@ -66,9 +70,8 @@ transformers = {
     return @
 
   keyword_change: =>
-    if @type == "ref"
-      if protected_names[fst(@)]
-        @[1] = "_" .. @[1]
+    if (@type == "ref") and protected_names[fst(@)]
+      @[1] = "_" .. @[1]
     return @
 
   anything_ref: =>
