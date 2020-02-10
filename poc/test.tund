@@ -1,2 +1,9 @@
-x. .= string.
-y. .= [string., string.]
+square x = (* x x)
+square 10
+
+nursulta x = case x
+  | Gaulist then 10
+  | "bruh" then 20
+end
+
+print (square (nursulta 15))

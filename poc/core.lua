@@ -18,25 +18,25 @@ eq = function (x)
   end
 end
 
-add = function (x)
+_43 = function (x)
   return function (y)
     return x + y
   end
 end
 
-sub = function (x)
+_45 = function (x)
   return function (y)
     return x - y
   end
 end
 
-mul = function (x)
+_42 = function (x)
   return function (y)
     return x * y
   end
 end
 
-div = function (x)
+_47 = function (x)
   return function (y)
     return x / y
   end
@@ -53,11 +53,31 @@ _if = function(e)
   end
 end
 
+_46 = function(t)
+  return function(i)
+    return t[i]
+  end
+end
+
 _then = function(e)
   return function (t)
     if e then
       return t()
     end
+  end
+end
+
+call = function(f)
+  return f()
+end
+
+gettype = function(o)
+  return getmetatable(o).__type
+end
+
+_61 = function(x)
+  return function(y)
+    return x == y
   end
 end
 

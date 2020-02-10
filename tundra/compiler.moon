@@ -67,9 +67,14 @@ CurryCall = (name, args) ->
   "#{name}#{table.concat call_args}"
 
 node_compile_functions =
-  body: (node) =>
-    table.concat((for n in *node
-      @ n), "\n")
+  body: (node, fl) =>      
+    c = (for n in *node
+      if fl.return and _index_0 == #node
+        "return " .. @ n
+      else
+        @ n)
+
+    table.concat([n for n in *c when n != ""], "\n")
 
   assignment: (node, l=true) =>
     left = unpackName fst node
@@ -77,22 +82,7 @@ node_compile_functions =
     set left, right, l
 
   container: (node, l=true) =>
-    contain = unpackName fst node
-    v_contained = snd node
-    switch nam v_contained
-      when "wildcard_all"
-        set contain, Function({'...'}, {Atom quote(contain), {'...'}}, true)
-      when "list"
-        z = for i = 1, #v_contained
-          if name = unpackName v_contained[i]
-            "_#{name .. i}"
-          else
-            "_#{i}"
-
-        set contain, Function(z, {Atom quote(contain), z}, true)
-      when "atom"
-        un = [unpackName v for v in *node[2,]]
-        set contain, Function(un, {Atom quote(contain), {table.concat un}}, true)
+    ""
   
   call: (node) =>
     called = fst node
@@ -109,6 +99,35 @@ node_compile_functions =
   group: (node) =>
     @ fst node
 
+  if: (node) =>
+    question = "(function() if #{@ fst node} then\n#{@ snd(node), return: true}\nend end)()"
+    question
+
+  case: (node, fl) =>
+    x = unpackName fst node
+    else_if = false
+    c = for match in *node[2,]
+      fm = fst match
+      question = switch nam fm
+        when "ref"
+          "if #{x} == #{unpackName fm} then"
+        when "atom"
+          if #fm <= 1
+            "if gettype(#{x}) == \"#{unpackName fm}\" then"
+          else
+            "if #{x} == #{@ fm} then"
+        when "else"
+            ""
+          
+      question = "else" .. question if else_if == true
+      else_if = true
+      question .. "\n" .. "return " .. @(snd(match)) .. "\n" .. do
+        if #node == _index_0
+          "end "
+        else
+          ""
+
+    "(function() #{table.concat(c, "")} end)()"
 
   atom: (node) =>
     return fst node if tonumber fst node
@@ -128,9 +147,9 @@ node_compile_functions =
   ref: (node) => 
     fst(node)
 
-compileNode = (node) ->
+compileNode = (node, flags = {}) ->
   f = node_compile_functions[nam node]
-  return f compileNode, node if f
+  return f compileNode, node, flags if f
   error "Could not find compiling function for #{nam node}"
 
 compileNodeToFile = (node, filename) ->

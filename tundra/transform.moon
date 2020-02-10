@@ -3,7 +3,6 @@
 -- By Pancakeddd, daelvn
 import DEBUG               from  require "tundra.config"
 import inspect, log        from (require "tundra.debug") DEBUG
-import FileGenerator       from require 'tundra.core'
 import fst, snd, trd, nam, last, quote, buildNode, deep_copy from require "tundra.utils"
 
 utf8 = require 'lua-utf8'
@@ -13,6 +12,17 @@ protected_names = {
   then: true
   while: true
 }
+
+apply = (fnl) -> (node) ->
+  -- apply transformations
+  for _, fn in pairs fnl do node = fn node
+  -- iterate
+  if node != nil
+    for k, elem in pairs node
+      if (type elem) == "table"
+        node[k] = (apply fnl) elem
+  -- return node
+  return node
 
 transformers = {
   removeAsteriskFromWildcard: =>
@@ -64,6 +74,7 @@ transformers = {
         i += 1
           
     return @
+      
 
   keyword_change: =>
     if @type == "ref"
@@ -82,17 +93,8 @@ transformers = {
         elseif utf8.byte(c) !=  nil
           "_" .. utf8.byte c 
     return @
-}
 
-apply = (fnl) -> (node) ->
-  -- apply transformations
-  for _, fn in pairs fnl do node = fn node
-  -- iterate
-  for k, elem in pairs node
-    if (type elem) == "table"
-      node[k] = (apply fnl) elem
-  -- return node
-  return node
+}
 
 {
   :apply

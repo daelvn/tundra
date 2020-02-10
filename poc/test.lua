@@ -1,7 +1,13 @@
 require "core"
-local x = function(string)
-return setmetatable({string}, {__type = "x"})
+local square = function(x)
+return _42(x)(x)
 end
-local y = function(_string1, _string2)
-return setmetatable({_string1, _string2}, {__type = "y"})
+square(10)
+local nursulta = function(x)
+return (function() if x == Gaulist then
+return 10
+elseif x == "bruh" then
+return 20
+end  end)()
 end
+print(square(nursulta(15)))

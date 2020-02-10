@@ -6,9 +6,11 @@ import tundraError                 from require "tundra.error"
 unpack or= table.unpack
 
 defined_errors =
-  dot_error:     "unexpected value after '.='"
-  expected_expr: "expected expression"
-  expected_dot:  "expected atom but got identifier"
+  dot_error:          "unexpected value after '.='"
+  expected_expr:      "expected expression"
+  expected_dot:       "expected atom but got identifier"
+  expected_end:       "expected end to terminate block"
+  expected_end_paren: "expected ')' to end paren group"
 
 
 throw = (e) -> error "tundra: #{defined_errors[e]}"
@@ -27,7 +29,7 @@ comment  = P"--" * (1 - S"\r\n")^0 * wstop
 anything = C ((P(1) - S" \t\r\n") - P":")^1
 
 keywords = {
-  "do", "end"
+  "do", "if", "end", "then", "with", "and"
 }
 
 checkKeywords = (n, kw) ->
@@ -61,42 +63,46 @@ tundra_parser = P {
   "tundra"
   tundra:        V"body"
 
+  end:           need("expected_end", P"end")
+
   body:          w * (V"statement" + V"expression")^0 / Node "body"
-  do:            w * P"do" * w * (V"statement" + V"expression")^0 * w * P"end" / Node "do"
+  do:            w * P"do" * w * (V"statement" + V"expression")^0 * w * V"end" / Node "do"
   lambda:        (w * P[[\]] * V"named" * w * P"->" * w * (V"statement" + V"expression") / Node "lambda") +
                  (P"->" * w * (V"statement" + V"expression") / Node "lambda_simple")
 
-  statement:     V"container" + V"function" + V"function_simple" + V"assignment" + V"list" + (V"bind" * (V"statement" + V"expression"))
+  statement:     V"container" + V"function" + V"function_simple" + V"assignment" + V"if" + V"case" + (V"bind" * (V"statement" + V"expression"))
 
-  atom:          w * dot_word / Node "atom"
   number:        w * number   / Node "atom"
   string:        w * string   / NodeWith "atom", true -- string = true
   identifier:    w * (checkKeywords word, keywords)     / Node "ref"
 
-  named:         V"index_atom" + V"index" + V"atom" + V"identifier"
-  real_atom:     V"index_atom" + V"index" + V"named" + V"number" + V"string"
+  named:          V"index" + V"identifier"
+  real_atom:     V"named" + V"number" + V"string"
   index:         w * C(word_nc * (P"/" * word_nc)^1) / Node "ref"
-  index_atom:    w * C(word_nc * (P"/" * word_nc)^1) * P"/" / Node "atom"
   anything:      w * anything / Node "anything_ref"
 
-  group:         w * P"(" * w * V"expression_wo" * w * P")" / Node "group"
+  group:         w * P"(" * w * V"expression_wo" * w * need("expected_end_paren", P")") / Node "group"
   expression:    V"call" + V"group" + V"real_atom" + V"do" + V"lambda"
   expression_wo: V"call_no_check" + V"group" + V"real_atom" + V"do" + V"lambda"
   
   call_no_check: w * V"anything" * ((C(P":"))^-1) * space * (V"named" + V"expression")^1 / Node "call"
-  call: w * V"named" * ((C(P":"))^-1) * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
+  call:          w * V"named" * ((C(P":"))^-1) * space * ((V"named" + V"expression") - wstop)^1 / Node "call"
 
-  wildcard_num:  (number^0 * P"*") / Node "wildcard_number"
-  wildcard_all:  P"**"             / Node "wildcard_all"
-  wildcard:      P"*"              / Node "wildcard"
 
-  container:     (V"atom" * w * P".=" + V"identifier" * w * P".=" * throw"expected_dot") * w * need("dot_error", (V"wildcard_all" + V"wildcard" + V"wildcard_num" + V"list" + V"atom")) / Node "container"
+  with_and:      w * V"identifier" * w * P"and" * w * V"with_body" / Node "and"
+  with_body:     V"with_and" + V"named"
+  with:          P"with" * w * V"with_body"^1
+  type_definition: w * P"|" * w * V"identifier" * w * V("with")^-1 / Node "type_def"
 
+  container:     V"named" * w * P".=" * w * need("dot_error", V"type_definition"^1) / Node "container"
+
+  if:            w * P"if" * w * V"expression" * w * V"body" * w * V"end" / Node "if"
+  case_body:     w * P"|" * w * ((P"_" / Node "else") + V"expression") * w * P"then" * w * V"expression" / Node "match"
+  case:          w * P"case" * w * V"expression" * w * (V"case_body"^0) * w * V"end" / Node "case"
   assignment:    w * V"named" * w * P"=" * w * V"expression" / Node "assignment"
   bind:          w * V"identifier" * w * P"<-" * w * V"expression" / Node "bind"
-  function:      w * V"anything" * space * (V"named" - wstop)^1 * w * P"=" * w * (V"statement"+V"expression") / Node "function"
+  function:      w * V"anything" * space * (V"real_atom" - wstop)^1 * w * P"=" * w * (V"statement"+V"expression") / Node "function"
   function_simple:  V"named" * w * P"=" * w * V"do" / Node "function"
-  list:          w * P"[" * w * ((V"real_atom")^1 * (w * P"," * w * V"real_atom")^0) * w * P"]" / Node "list"
 }
 
 matchString = (s) -> 
